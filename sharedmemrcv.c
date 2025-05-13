@@ -1,16 +1,20 @@
+#include <stdio.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
-#include <stdio.h>
+
+#define SHM_SIZE 1024  // Shared memory size
 
 int main() {
-    key_t key = ftok("shmfile", 65);
-    int shmid = shmget(key, 1024, 0666 | IPC_CREAT);
-    char *str = (char*) shmat(shmid, (void*)0, 0);
+    key_t key = ftok("shmfile", 65);  // Same key as sender
+    int shmid = shmget(key, SHM_SIZE, 0666);  // Access the shared memory
 
-    printf("Data read from shared memory: %s\n", str);
+    // Attach to the shared memory
+    char *data = (char*) shmat(shmid, NULL, 0);
 
-    shmdt(str);               // Detach
-    shmctl(shmid, IPC_RMID, NULL);  // Optional: Delete shared memory
+    printf("Message received: %s\n", data);
+
+    // Detach from the shared memory
+    shmdt(data);
 
     return 0;
 }
