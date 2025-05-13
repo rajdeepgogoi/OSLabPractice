@@ -1,22 +1,24 @@
+#include <stdio.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
-#include <stdio.h>
 #include <string.h>
 
+#define SHM_SIZE 1024  // Shared memory size
+
 int main() {
-    key_t key = ftok("shmfile", 65);
-    int shmid = shmget(key, 1024, 0666 | IPC_CREAT);
-    char *str = (char*) shmat(shmid, (void*)0, 0);
+    key_t key = ftok("shmfile", 65);  // Create unique key
+    int shmid = shmget(key, SHM_SIZE, 0666 | IPC_CREAT);  // Create shared memory
 
-    printf("Write: ");
-    fgets(str, 1024, stdin);  // Safer input
+    // Attach to the shared memory
+    char *data = (char*) shmat(shmid, NULL, 0);
 
-    // Remove newline character, if present
-    str[strcspn(str, "\n")] = 0;
+    printf("Write message: ");
+    fgets(data, SHM_SIZE, stdin);  // Get user input
 
-    printf("Data written: %s\n", str);
+    printf("Message sent: %s\n", data);
 
-    shmdt(str);  // Detach shared memory
+    // Detach from the shared memory
+    shmdt(data);
 
     return 0;
 }
